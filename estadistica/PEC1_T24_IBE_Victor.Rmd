@@ -1,0 +1,411 @@
+---
+title: "PEC1 Otoño 2024"
+author: "Víctor Luque Martín"
+date: '15/10/2024'
+output:
+  pdf_document: default
+  word_document: default
+fontsize: 12pt
+urlcolor: blue
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+**En esta actividad no está permitido el uso de herramientas de
+inteligencia artificial. En el plan docente y en la [web sobre
+integridad académica y plagio de la
+UOC](https://campus.uoc.edu/estudiant/microsites/plagi/es/index.html)
+encontraréis información sobre qué se considera conducta irregular en la
+evaluación y las consecuencias que puede tener.**
+
+Esta PEC se basará en los datos transversales de la encuesta *High
+School and Beyond* realizada por el Departamento de Educación de los
+EE.UU. en 1980, con un seguimiento en 1986. La encuesta incluyó a
+estudiantes de aproximadamente 1100 institutos.
+
+La base de datos contiene indicaciones, entre otras de
+
+1.  *gender* = variable cualitativa que indica el género (hombre o
+    mujer)
+2.  *ethnicity* = variable cualitativa que indica la etnia
+    (afroamericano, hispano u otro)
+3.  *score* = puntuación de la prueba del año base (1980)
+4.  *home* = variable cualitativa. ¿La familia es propietaria de su
+    casa? (sí o no)
+5.  *urban* = variable cualitativa. ¿La escuela está en una zona urbana?
+    (sí o no)
+6.  *unemp* = tasa de desempleo en el condado donde vive el estudiante
+    en 1980
+7.  *income* = variable cualitativa. ¿Los ingresos familiares son
+    superiores a los 25000 USD anuales? (por encima o por debajo)
+8.  *region* = variable cualitativa que indica la región (oeste u otra)
+
+Para importar los datos podéis usar la siguiente instrucción:
+
+```{r}
+datos <- read.table("CollegeDistance.csv", header = TRUE,
+         sep = ",", na.strings = "NA",
+         fileEncoding = "UTF-8", quote = "\"",
+         colClasses = c(rep("numeric", 1), 
+                        rep("character", 2), 
+                        rep("numeric", 1),
+                        rep("character", 4), 
+                        rep("numeric", 5), 
+                        rep("character", 2)))
+```
+
+Os puede ser útil consultar el siguiente material del reto 1:
+
+1.  El entorno estadístico R. Estructura, lenguaje y sintaxis
+2.  Análisis de datos y estadística descriptiva con R
+3.  Actividades Resueltas del Repto 1 (Estadística Descriptiva)
+
+Hay que entregar la práctica en formato ".pdf" en esta misma tarea
+Moodle.
+
+# NOMBRE: Víctor Luque Martín
+
+# PEC1
+
+Una vez importados los datos...
+
+## Pregunta-1 (30%)
+
+Estudiaremos la variable *score*:
+
+**1.1** Ordenad la base de datos según el orden creciente de la variable
+*score* y mostrad solo las 3 primeras filas de esta base de datos
+ordenada. Mostrad el resumen numérico (mínimo, Q1, mediana, media, Q3 y
+máximo), la varianza y la desviación estándar de la variable *score*
+(10%).
+
+```{r}
+datos_ordenados <- datos[order(datos$score, decreasing = FALSE),]
+
+# Mostrar los primeros 3
+head(datos_ordenados, 3)
+```
+
+```{r}
+# Función para calcular la moda
+calcular_moda <- function(serie){
+  valores_unicos <- unique(serie)
+  frecuencia_de_valores <- tabulate(match(serie, valores_unicos))  
+  return(valores_unicos[which.max(frecuencia_de_valores)])
+}
+
+# Función para redondear a 3 decimales
+redondear <- function(value){
+  return(round(value, digits=3))
+}
+```
+
+```{r}
+
+# Función para obtener el resumen numérico
+resumen_numerico <- function(serie, columna){
+   # Recuento
+  recuento <- length(serie)
+  
+  # Media
+  media <- mean(serie, na.rm = TRUE)
+  
+  # Desviación Estándar
+  desviacion_estandar <- sd(serie, na.rm = TRUE)
+  
+  # Mínimo
+  minimo <- min(serie, na.rm = TRUE)
+  
+  # Primer Cuartil (Q1)
+  primer_cuartil <- quantile(serie, 0.25, na.rm = TRUE)
+  
+  # Segundo Cuartil (Q2) o Mediana
+  segundo_cuartil <- quantile(serie, 0.50, na.rm = TRUE)
+  
+  # Tercer Cuartil (Q3)
+  tercer_cuartil <- quantile(serie, 0.75, na.rm = TRUE)
+  
+  # Máximo
+  maximo <- max(serie, na.rm = TRUE) 
+  
+  # Moda
+  moda <- calcular_moda(serie)
+  
+  # Varianza
+  varianza <- var(serie, na.rm = TRUE)
+  
+  respuesta <- paste0("Resumen numérico de columna '", columna, "'",
+       "\n- Recuento: ", redondear(recuento),
+       "\n- Media: ", redondear(media),
+       "\n- Desviación Estandar: ", redondear(desviacion_estandar),
+       "\n- Mínimo: ", redondear(minimo),
+       "\n- Primer Cuartil (Q1): ", redondear(primer_cuartil),
+       "\n- Segundo Cuartil o Mediana (Q2): ", redondear(segundo_cuartil),
+       "\n- Tercer Cuartil (Q3): ", redondear(tercer_cuartil),
+       "\n- Máximo: ", redondear(maximo),
+       "\n- Moda: ", redondear(moda),
+       "\n- Varianza: ", redondear(varianza))
+  
+  return(respuesta)
+}
+```
+```{r}
+cat(resumen_numerico(datos$score, "score"))
+```
+
+**1.2** Mostrad el resumen numérico de la variable *score*, pero solo de
+los estudiantes cuya familia **NO** es propietaria de su casa. Haced el
+histograma correspondiente con breaks=20 para que haya un número de
+intervalos (clases) suficientes. Comentad los resultados númericos y
+gráficos (20%).
+
+```{r}
+# Obtener un subset filtrado
+estudiantes_no_propietarios = subset(datos, home=="no")
+```
+
+```{r}
+# Mostrar el resumen numérico de la variable score del subconjunto
+cat(resumen_numerico(estudiantes_no_propietarios$score, "score"))
+```
+
+Según los datos mostrados por el resumen numérico de la variable
+obtenemos las siguientes conclusiones
+
+**Centro y Tendencia Central**
+
+-   **Media (48.55)**: El "centro" de la distribución está al rededor de
+    48.55.
+
+-   **Mediana (48.115)**: La distribución está bien equilibrada ya que
+    este valor no se distancia mucho de la media y no presenta una
+    fuerte asimetría
+
+-   **Moda (37.25)**: La concentración de los valores se encuentra
+    alrededor de 37.25, indicando un ligero sesgo hacia la izquierda.
+
+**Dispersión y Variabilidad**
+
+-   **Desviación estándar (8.99)**: Indica que la puntuación de la
+    columna score tiende a desviarse unas 8.99 unidades de la media,
+    indicando una dispersión moderada en los datos
+
+-   **Varianza (80.827)**: Al ser el cuadrado de la desviación estándar,
+    confirma que los valores están bastante dispersos en torno a la
+    media
+
+-   **Rango (máximo - mínimo)**: El rango de los datos es de
+    `68.96 - 30.78 = 38.18` indicando una gran diversidad en los
+    puntuajes de la variable score
+
+**Distribución y Asimetría**
+
+-   **Primer cuartil (Q1 = 40.818) y Tercer cuartil (Q3 = 55.728)**: El
+    rango intercuartílico, que es `Q3 - Q1 = 55.728 - 40.818 = 14.910`,
+    al ser más pequeño que el rango total, indica que los puntuajes
+    están concentrados cerca de la mediana.
+
+-   **Mínimo (30.78) y Máximo (68.96)**: Indican que los extremos están
+    muy separados, obteniendo una distribución más amplia, aun que la
+    moda sea relativamente baja (37.25), el máximo muestra que hay
+    puntuajes bastante altos.
+
+**Simetría y Sesgo**
+
+La proximidad entre la media (48.55), la mediana (48.115), y la moda
+(37.25) podría indicar que la distribución tiene un sesgo leve hacia la
+izquierda, ya que la moda es menor que la mediana y la media, podría ser
+que haya una mayor cantidad de valores en el extremo inferior aunque la
+diferencia no es excesivamente grande.
+
+**Conclusión Resumen Numérico**
+
+La variable score muestra una distribución moderadamente dispersa, con
+una tendencia central bien definida cerca de los 48 puntos. El sesgo es
+leve y hacia la izquierda, tambien indica que hay valores altos pero la
+concentración de los puntuajes se encuentra en el rango inferior,
+alrededor de la moda. La varianza y el rango indican que hay diversidad
+en los puntuajes pero con una concentración elevada en el rango
+intercuartílico.
+
+```{r}
+# Mostrar el histograma de la variable score del subconjunto
+hist(estudiantes_no_propietarios$score, breaks = 20, 
+     main = "Histograma de Score", xlab = "Score", 
+     col = "lightblue", border = "black")
+```
+
+**Conclusión Histograma**
+
+El histograma confirma y visualiza los patrones observados en el resumen
+numérico de la variable score. Existe una ligera asimetría hacia la
+izquierda, la concentración central de los datos entre 40 y 55 y la
+dispersión moderada se encuentra alineada con las estadísticas de
+tendencia central, dispersión y cuantiles.
+
+## Pregunta-2 (10%)
+
+Mostrad el valor máximo de la variable *score* junto con las variables
+"gender", "ethnicity", "income" y "region" donde se da este valor
+máximo.
+
+```{r}
+head(datos[order(datos$score, decreasing = TRUE), 
+           c("score", "gender", "ethnicity", "income", "region")], 1)
+```
+
+## Pregunta-3 (15%)
+
+Si quisiéramos estudiar la relación entre las variables *score* y
+*unemp*, ¿qué gráfico usaríamos? ¿Qué nos puede revelar este gráfico?
+Mostrad la instrucción de R que haga este gráfico.
+
+El gráfico a utilizar sería un diagrama de dispersión o `scatter plot`.
+Nos puede revelar la siguiente información:
+
+-   **Correlación:** Si existe una relación positiva (Las variables
+    aumentar juntas) o negativa (Una aumenta y otra disminuye) entre las
+    variables
+
+-   **Forma de la relación:** Si la relación es lineal o no
+
+-   **Patrones o tendencias:** Permite identificar tendencias generales
+    en los datos
+
+-   **Valores atípicos:** Puntos que se alejan significativamente del
+    patrón general, indicando anomalías o datos interesantes para
+    investigar más a fondo
+
+-   **Agrupaciones:** Si los datos se agrupan en ciertas áreas del
+    gráfico, lo que podría indicar subgrupos dentro de los datos.
+
+```{r}
+plot(datos$score, datos$unemp,
+     main="Diagrama de dispersión entre Score y Unemployment",
+     xlab="Score",
+     ylab="Unemp",
+     pch=19,
+     col="blue")
+```
+
+## Pregunta-4 (25%)
+
+Mostrad la tabla de frecuencias absolutas de la variable *ethnicity*, y
+otra tabla con los porcentajes de los diferentes niveles de esta misma
+variable *ethnicity* (podéis utilizar el comando **prop.table**). Haced
+el gráfico adecuado de las frecuencias o porcentajes. Comentad los
+resultados obtenidos.
+
+**Tabla de frecuencias absolutas de la variable `ethnicity`**
+
+```{r}
+freq_abs_etnia <- table(datos$ethnicity)
+freq_abs_etnia
+```
+
+**Tabla de porcentajes de la variable `ethnicity`**
+
+```{r}
+freq_perc_etnia <- prop.table(freq_abs_etnia) * 100
+freq_perc_etnia
+```
+
+**\# Gráfico de barras de las frecuencias absolutas de la variable
+`ethnicity`**
+
+```{r}
+
+barplot(freq_abs_etnia, 
+        main="Frecuencias absolutas de Ethnicity",
+        xlab="Ethnicity", 
+        ylab="Frecuencia",
+        col="skyblue")
+```
+
+**Conclusiones**
+
+-   **Grupo predominante**: El grupo `other` es claramente el más
+    representado en el conjunto de datos, con 3050 individuos, indicando
+    que casi el 65% de la población en este dataset pertenece a este
+    grupo.
+
+-   **Representación de otros grupos**: El grupo `hispanic`, con 903
+    individuos, representa una porción considerable del conjunto de
+    datos, aproximadamente un 20% de la población pertenece a este
+    grupo. Por otro lado, el grupo `afam`, con 786 individuos,
+    representa aproximadamente un 16% del total, siendo el grupo
+    minoritario en comparación con los otros dos.
+
+-   **Distribución desequilibrada**: Al observar el gráfico de
+    frecuencias y las tablas, podemos observar que el dataset no se
+    encuentra balanceado, siendo el grupo `other` el más numeroso,
+    incluso comparándolo con la combinación de los otros dos grupos.
+    Esto puede influir en el análisis posterior si se tiene en cuenta la
+    variable `ethnicity` ya que los resultados podrían estar sesgados
+    hacia el comportamiento del grupo mayoritario.
+
+## Pregunta-5 (20%)
+
+Haced los boxplots de la variable *score* distinguiendo por nivel de
+ingresos familiares. Comentad el resultado obtenido.
+
+```{r}
+
+par(mfrow = c(1,2))
+
+boxplot(subset(datos, income=="low")$score,
+        main="Score con ingresos bajos",
+        ylab="Score")
+
+boxplot(subset(datos, income=="high")$score,
+        main="Score con ingresos altos",
+        ylab="Score")
+```
+
+Observando los boxplots obtenemos:
+
+**Mediana**
+
+-   El grupo de ingresos bajos, mediana del `score` parece ser
+    ligeramente por debajo de 50.
+
+-   El grupo de ingresos altos, la mediana del `score` está alrededor de
+
+    55. 
+
+**Rango intercuartil**
+
+-   El rango intercuartil (IQR), es similar en ambos grupos, sin
+    embargo, el IQR del grupo con ingresos altos está desplazado hacia
+    valores más altos.
+
+**Rango total**
+
+-   En ambos grupos observamos, y descartando valores atípicos,
+    observamos que el rango es similar de 30 a 70
+
+-   En ambos grupos existen individuos con scores bajos y otros con
+    scores altos, no obstante, el grupo de ingresos altos tiene un
+    conjunto de datos con puntuajes generalmente mayores
+
+**Simetría**
+
+-   El grupo de ingresos bajos tiene una distribución simétrica
+
+-   El grupo de ingresos altos tiene una ligera asimetría negativa, ya
+    que la mayor concentración de los datos se encuentra en la mitad
+    superior del IQR, probablemente indicando, que dentro de este grupo,
+    existan personas con ingresos más bajos que la mayoría
+
+**Conclusión**
+
+-   Las personas con ingresos altos tienden a tener mejores `scores` de
+    media que las personas con ingresos bajos
+
+-   La distribución de scores es similar en ambos grupos, no obstante,
+    en el grupo de ingresos altos, la distribución se encuentra
+    desplazada hacia valores más altos
+
+-   Es bastante probable que haya una estrecha relación entre el nivel
+    de ingresos y el `score`
