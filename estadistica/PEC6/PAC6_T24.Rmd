@@ -1,0 +1,214 @@
+---
+title: "PEC6 Otoño 2024"
+author: "Víctor Luque Martín"
+date: '02/01/2025'
+output:
+  pdf_document: default
+  word_document: default
+fontsize: 12pt
+---
+
+**En esta actividad no está permitido el uso de herramientas de inteligencia artificial.
+En el plan docente y en el [sitio web sobre integridad académica y plagio de la UOC](https://campus.uoc.edu/estudiant/microsites/plagi/ca/index.html) encontraréis información sobre qué se considera conducta irregular en la evaluación y las consecuencias que puede tener.**
+
+La PEC se basará en el archivo “Avaluacio100.cvs”. El archivo (obtenido del portal de datos abiertos de la Generalitat de Cataluña) contiene los resultados de la evaluación de las competencias básicas de sexto de primaria de 100 alumnos.
+
+Contiene las variables: 
+
+
+1. ANY Año de las pruebas.
+
+2. CODI ALUMNE Código del alumno.
+
+3. PCAT Puntuación global en lengua catalana (sobre 10000).
+
+4. PCAT_CL Puntuación comprensión lectora en lengua catalana (sobre 10000).
+
+5. PCAT_EE Puntuación expresión escrita en lengua catalana (sobre 10000).
+
+6. PCAST Puntuación global en lengua castellana (sobre 10000).
+
+7. PCAST_CL Puntuación comprensión lectora en lengua castellana (sobre 10000).
+
+8. PCAST_EE Puntuación expresión escrita en lengua castellana (sobre 10000).
+
+9. PMAT Puntuación global en matemáticas (sobre 10000).
+
+10. PANG Puntuación global en lengua inglesa (sobre 10000).
+
+11. PANG_CO Puntuación comprensión oral en lengua inglesa (sobre 10000).
+
+12. PANG_CE Puntuación comprensión escrita en lengua inglesa (sobre 10000). 
+
+13. PCAT_CO Puntuación comprensión oral en lengua catalana (sobre 10000).
+
+14. PCAST_CO Puntuación comprensión oral en lengua castellana (sobre 10000).
+
+15. GENERE Género del alumno.
+
+
+Debéis importar los datos y crear un conjunto de datos con el nombre de \bf aval\rm . Por ejemplo con el comando
+
+```{r}
+aval<-read.table(file='Avaluacio100.csv',header=TRUE,sep=';',dec='.')
+```
+
+Os puede ser útil consultar el siguiente material:
+
+1. Módulo 10 Regresión lineal simple de las notas de estudio
+2. Tema 1 de regresión lineal del módulo 5 de los Manuales de R
+3. Actividades Resueltas del Reto 5 (Regresión lineal)
+
+
+# NOMBRE: Víctor Luque Martín
+
+# PEC6
+
+## Pregunta 1 (100%) 
+
+Queremos saber si hay relación lineal entre las notas de castellano y las de inglés de las pruebas de evaluación de sexto. En particular, veremos la relación entre las notas globales y entre las notas de comprensión oral. 
+
+## a) (10%)  Haced el diagrama de dispersión de las variables correspondientes a la variable "PANG" (en el eje de ordenadas) en función de la variable "PCAST" (en el eje de abscisas) y haced el diagrama de dispersión de las variables correspondientes a la variable "PANG_CO" (en el eje de ordenadas) en función de la variable "PCAST_CO" (en el eje de abscisas). Comentad los gráficos.
+
+```{r}
+plot(
+  aval$PCAST, aval$PANG,
+  xlab = "Puntuación global en castellano (PCAST)",
+  ylab = "Puntuación global en inglés (PANG)",
+  main = "Relación entre puntuaciones globales (PCAST vs PANG)",
+  pch = 19, col = "blue"
+)
+```
+
+En el primer gráfico generado se muestra la relación entre las variables PCAST y PANG podemos observar los siguientes aspectos al visualizar el gráfico:
+
+- **Tendencia**: Los puntos del diagrama de dispersión forman una linea recta ascendente, por lo que nos muestra una correlación positiva entre ambas variables.
+- **Dispersión**: Podemos observar una mayor dispersión cuando las puntuaciones de ambas variables son bajar, no obstante, cuanto más altas sean las puntuaciones podemos observar que hay una menor dispersión de los datos alrededor de esa linea recta ascendente
+- **Anomalías**: Podemos encontrar algún punto alejado (outlier) del grupo principal.
+
+```{r}
+# Diagrama de dispersión entre PANG_CO y PCAST_CO
+plot(
+  aval$PCAST_CO, aval$PANG_CO,
+  xlab = "Puntuación comprensión oral en castellano (PCAST_CO)",
+  ylab = "Puntuación comprensión oral en inglés (PANG_CO)",
+  main = "Relación entre comprensión oral (PCAST_CO vs PANG_CO)",
+  pch = 19, col = "red"
+)
+```
+
+En el segundo gráfico generado se muestra la relación entre las variables PCAST_CO y PANG_CO podemos observar los siguientes aspectos al visualizar el gráfico:
+
+- **Tendencia**: Los puntos del diagrama de dispersión no forman ninguna linea recta ascendente, lo que nos indica que las variables no están correlacionadas entre sí.
+
+**Conclusiones**:
+
+- En el primer gráfico si que podemos concluir que estamos ante una posible regresión lineal, la relación entre las variables es positiva fuerte.
+- En el segundo gráfico no podemos concluir que estemos ante una regresión lineal, los datos reflejan una relación nula, ya que no siguen un patrón claro.
+
+## b) (30%)  Calculad con R las rectas de regresión correspondientes a los gráficos anteriores. Haced los diagramas de dispersión, añadiendo las rectas de regresión. Dad explícitamente las rectas de regresión.
+
+```{r}
+# Modelo de regresión para PANG en función de PCAST
+modelo_global <- lm(PANG ~ PCAST, data=aval)
+
+# Diagrama de dispersión con recta de regresión (PANG vs PCAST)
+plot(
+  aval$PCAST, aval$PANG,
+  xlab = "Puntuación global en castellano (PCAST)",
+  ylab = "Puntuación global en inglés (PANG)",
+  main = "Relación entre puntuaciones globales (PCAST vs PANG)",
+  pch = 19, col = "blue"
+)
+abline(modelo_global, col = "darkblue", lwd = 2)
+```
+```{r}
+# Mostrar la ecuación de la recta de regresión para PANG ~ PCAST
+cat("Recta de regresión (PANG ~ PCAST): y =", 
+    coef(modelo_global)[1], "+", coef(modelo_global)[2], 
+    "x")
+```
+
+Finalmente la ecuación de la recta para el modelo global es: $$y = 2828.883 + 0.704x$$
+
+
+```{r}
+# Modelo de regresión para PANG_CO en función de PCAST_CO
+modelo_comprension <- lm(PANG_CO ~ PCAST_CO, data=aval)
+
+# Diagrama de dispersión con recta de regresión (PANG_CO vs PCAST_CO)
+plot(
+  aval$PCAST_CO, aval$PANG_CO,
+  xlab = "Puntuación comprensión oral en castellano (PCAST_CO)",
+  ylab = "Puntuación comprensión oral en inglés (PANG_CO)",
+  main = "Relación entre comprensión oral (PCAST_CO vs PANG_CO)",
+  pch = 19, col = "red"
+)
+abline(modelo_comprension, col = "darkred", lwd = 2)
+```
+
+```{r}
+# Mostrar la ecuación de la recta de regresión para PANG_CO ~ PCAST_CO
+cat("Recta de regresión (PANG_CO ~ PCAST_CO): y =", 
+    coef(modelo_comprension)[1], "+", 
+    coef(modelo_comprension)[2], "x")
+```
+Finalmente la ecuación de la recta para el modelo de comprensión es: $$y = 3146.134 + 0.566x$$
+
+## c) (20 %)  ¿Qué variabilidad queda explicada en los dos casos anteriores? ¿Son buenos modelos lineales?
+
+Para calcular la variabilidad, será necesario obtener el coeficiente de determinación ($R^2$) de ambos modelos. Si $R^2$ tiende a 1, mejor será el ajuste del modelo.
+
+```{r}
+r2_global <- summary(modelo_global)$r.squared
+cat("R2 Global: ", r2_global)
+```
+
+```{r}
+r2_comprension <- summary(modelo_comprension)$r.squared
+cat("R2 Comprensión: ", r2_comprension)
+```
+
+Según los resultados obtenidos podemos concluir:
+
+- En el modelo global, el modelo tiene un ajuste moderado a los datos, porque $0.3 < R^2=0.604 \le 0.7$. 
+- En el modelo compresión, el resultado del coeficiente de determinación está por debajo de 0.3 por lo que el modelo es débil y no explica suficientemente la variabilidad.
+- En caso de que en algunos de los modelos el coeficiente de determinación fuese superior a 0.7 indicaría que se trata de un buen modelo lineal.
+
+## d) (20 %)  Haced el gráfico de los residuos frente a las predicciones para la regresión en que queremos explicar la variable "PANG". Comentad el gráfico.
+
+```{r}
+residuos <- residuals(modelo_global)
+predicciones <- fitted(modelo_global)
+plot(
+  predicciones, residuos,
+  xlab = "Predicciones", ylab = "Residuos",
+  main = "Residuos frente a predicciones (PANG ~ PCAST)",
+  pch = 19, col = "purple"
+)
+abline(h = 0, col = "darkgray", lwd = 2)
+```
+
+Podemos comentar el gráfico atendiendo a los siguientes aspectos:
+
+- **Distribución de los residuos**: Los residuos parecen estar alrededor de 0, indicando que no presenta un sesgo sistemático en las predicciones. No obstante, existe una asimetría porque algunos puntos muestran mayor concentración por encima del eje cero en las predicciones más bajas (alrededor de los 5000)
+- **Ausencia de patrones claros**: No existe un patrón evidente, lo que indica que la relación entre las variables puede ser bien representada por un modelo lineal.
+- **Outliers**: Existen algunos puntos fuera del rango común de resiguos (valores superiores a 3000 o inferiores a -2000). Estos datos deben analizarse particularmente para comprender si afectan significativamente al modelo.
+
+**Conclusión**:
+
+- El gráfico muestra que el modelo lineal es adecuado para explicar PANG en función de PCAST. 
+- Los outlierts prodrían requerir de un análisis adicional para comprobar que no están afectando desproporcionadamente al modelo.
+
+## e) (20 %) Queremos hacer contrastes de hipótesis con un nivel de significación del $0.1$ sobre los coeficientes de la recta que explica la variable "PANG". ¿Hay algún coeficiente no significativo? Razona la respuesta.
+
+```{r}
+summary_modelo_global <- summary(modelo_global)
+cat("Pruebas de significación para los coeficientes:\n")
+print(summary_modelo_global$coefficients)
+```
+Con un nivel de significación de $\alpha = 0.1$, cualquier coeficiente con un p-valor menor que 0.1 se considera significativo.
+
+Ambos coeficientes tienen p-valores extremadamente pequeños, lo que indica que ambos son altamente significativos.
+
+No existen coeficientes no sifnificativos para este modelo. Tanto el intercepto como la pendiente son significativos para predecir la variable PANG en función de PCAST. El modelo lineal es adecuado para reflejar la relación entre estas variables.

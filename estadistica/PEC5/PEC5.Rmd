@@ -1,0 +1,423 @@
+---
+title: "PEC 5 Otoño 2024 - Enunciado"
+author: "Víctor Luque Martín"
+output:
+  pdf_document: default
+  word_document: default
+fontsize: 12pt
+---
+
+En esta actividad no está permitido el uso de herramientas de inteligencia artificial. En el plan docente i en la [web sobre integridad académica y de plagio de la UOC](https://campus.uoc.edu/estudiant/microsites/plagi/es/index.html) encontraréis toda la información sobre que se considera conducta irregular en la evaluación y las consecuencias que pueden darse.
+
+**Planteamiento del ejercicio**
+
+Estamos interesados en conocer las diferencias territoriales en España sobre las rentas disponibles, los costes y las condiciones de vida de los hogares. Para ello disponemos de una muestra representativa de microdatos provenientes de la [Encuesta de Presupuestos Familiares (EPF)](https://www.ine.es/prensa/epf_prensa.htm) del Instituto Nacional de Estadística (INE) para el año 2023.
+
+
+La base de datos **MuestraEPF2023.xlsx** es un Excel que contiene la siguiente información:
+•	*id_hogar*: Código identificativo del hogar encuestado 
+
+•	*grado_urbanizacion*: El grado de urbanización de la zona de residencia (Zona muy poblada, Zona media o Zona poco poblada)
+
+•	*desc_ccaa*: Comunidad Autónoma
+
+•	*renta_hogar*: Renta disponible total del hogar en el año anterior al de encuesta
+
+•	*regimen_vivienda*: Régimen de la vivienda (En propiedad sin hipoteca, En propiedad con hipoteca, En alquiler o realquiler a precio de mercado, En alquiler o realquiler a precio inferior al de mercado, En cesion gratuita)
+
+•	*cuota_hipoteca*: Cuota hipotecaria mensual (importe del último recibo mensual del préstamo solicitado para la compra de la vivienda principal). Incluye amortización e intereses
+
+•	*retraso_alq_hip*: Si se ha retrasado en el pago de alquiler o hipoteca (No; Sí, solamente una vez; Sí, dos veces o más)
+
+•	*afrontar_imprevistos*: Si la unidad familiar puede afrontar gastos no previstos (1-Sí/0-No)
+
+•	*pobreza_energetica*: Si el hogar tiene dificultades económicas que no permiten calentar la vivienda en invierno (1-Sí/0-No)
+
+•	*vacaciones_semana_anual*: Sí la unidad familiar se puede permitir al menos una semana de vacaciones fuera del municipio una vez al año (1-Sí/0-No)
+
+Os puede ser útil consultar el siguiente material:
+
+1. Módulos de contraste de hipótesis y Contraste de dos muestras
+
+2. Actividades resultats del reto 4
+
+```{r}
+datos <- readxl::read_excel("Muestra_EPF_2023.xlsx")
+```
+
+# NOMBRE: Víctor Luque Martín
+
+# PEC5
+## Pregunta-1 (30%) 
+
+
+Con los datos de la muestra de la EPF realiza los cálculos con R y responde a las preguntas con una redacción de las conclusiones a las que se llegan.
+
+**Notas: 1) Suponed que la renta sigue una distribución normal. 2) Utilizad la función de R correspondiente, es decir, no hagáis los cálculos manualmente con las fórmulas de las notas del temario.**
+
+a) Contrastad con un nivel de significación del 5% si la renta media de la comunidad autónoma de Aragón se puede considerar que es de 36.386€. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (10%).
+
+### Solución
+
+```{r}
+# Filtrar los datos de Aragón
+renta_aragon <- datos$renta_hogar[datos$desc_ccaa == "Aragón"]
+# Realizar el test t una muestra
+res <- t.test(renta_aragon, mu=36388, 
+              alternative="two.sided", conf.level=0.95)
+res
+
+```
+
+Hipótesis 1: $\mu = 36.388 \text{€}$
+
+Hipótesis 2: $\mu \neq 36.388 \text{€}$
+
+1- Estadístico del test (t): 0.041904.
+  Cuando el valor estadístico es tan cercano a 0, se puede deducir que la media 
+  de 36.413,53€ se encuentra muy próxima al valor de la hipótesis planteada 
+  (36.388 €).
+
+2- Grados de libertad (df): 1405.
+  Este resultado indica que la muestra es relativamente grande, por lo que le
+  da mayor veracidad estadística al contraste.
+
+3- p-valor: 0.9666.
+  El p-valor respecto a $\alpha = 0.05$ es mucho mayor. Esto quiere decir que la 
+  probabilidad de que se observe una mayor diferencia a la detectada es muy 
+  alta (96,66%).
+
+4- Intervalo de confianza (95%): (35218.27 €, 37608.79 €).
+  El intervalo de confianza es 95% para la media que abarca el valor hipotético 
+  de 36.388 €. No se puede descartar que la media real esté bastante cerca del 
+  valor hipotetizado.
+
+En conclusión, dado que el p-valor es mucho mayor que 0.05 y no se puede 
+rechazar que exista una hipótesis nula. Esto quiere decir que, con la 
+información disponible, no existe una evidencia estadísticamente significativa 
+que pueda afirmar que la renta media en Aragón difiere de 36.388 €.
+
+b) Contrastad con un nivel de significación del 1% si la renta media de la comunidad autónoma de Cataluña se puede considerar que es de 43.000€. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (10%).
+
+### Solución
+
+```{r}
+# Filtrar los datos de Cataluña
+renta_cataluña <- datos$renta_hogar[datos$desc_ccaa == "Cataluña"]
+
+# Realizar el test t una muestra
+res <- t.test(renta_cataluña, mu = 43000, 
+                           alternative = "two.sided", 
+                           conf.level = 0.99)
+
+res
+
+```
+
+Hipótesis 1: $\mu = 43.000 \text{€}$
+
+Hipótesis 2: $\mu \neq 43.000 \text{€}$
+
+El nivel de significación es 1% ($\alpha = 0.01$).
+
+1- Estadístico del test (t): -2.8361.
+  Cuando el valor t es negativo quiere decir que la media muestral se encuentra 
+  por debajo del valor de la hipótesis.
+
+2- Grados de libertad (df): 7475
+  Esto indica que se utilizó una muestra lo suficientemente grande y le da un 
+  mayor poder estadístico al contraste.
+
+3- p-valor: 0.004579.
+  El p-valor es menor que 0.01 (p-valor < $\alpha$ (0.01)). Esto quiere decir que se
+  rechazaría la hipótesis en la que $\mu = 43.000\text{€}$.
+
+4- Intervalo de confianza (99%): [41312.06, 42919.03]
+En este caso, el intervalo no incluye el valor de 43.000€. De hecho, el valor 
+hipotetizado se encuentra por encima del límite superior del intervalo al 99%. 
+Esto puede indicar que la media real es bastante diferente de 43.000€.
+
+En conclusión, dado que el p-valor es menor que 0.01, se rechaza la hipótesis 
+nula. Por lo tanto, con un nivel de significación del 1% se puede concluir que
+la renta media de la comunidad autónoma de Cataluña es distinta de 43.000€.
+
+c) Contrastad con un nivel de significación del 5% si la renta media de la comunidad autónoma del País Vasco es superior a 36.386€. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (10%).
+
+### Solución
+
+```{r}
+# Filtramos los datos para el País Vasco
+renta_pais_vasco <- datos$renta_hogar[datos$desc_ccaa == "País Vasco"]
+# Realizamos el test t una muestra, unilateral a la derecha (greater)
+res <- t.test(renta_pais_vasco, mu = 36386,
+                            alternative = "greater", 
+                            conf.level = 0.95)
+
+res
+
+```
+
+Hipótesis 1: $\mu \le 36.386 \text{€}$
+
+Hipótesis 2: $\mu > 36.386 \text{€}$
+
+El contraste es unilateral, ya que se pretende comprobar si la media del País 
+Vasco es superior a los 36.386€.
+
+1- Estadístico del test (t): 15.519.
+  Un valor t tan elevado indica que la media muestral (46.213,44€) está muy 
+  por encima del valor hipotetizado de 36.386 €.
+
+2- Grados de libertad (df): 2561
+  Esto indica que se utilizó una muestra lo suficientemente grande y le da un 
+  mayor poder estadístico al contraste.
+
+3- p-valor: 2.2e-16.
+  Este p-valor es muchísimo menor que el nivel de significación elegido (5%).
+  
+4- Intervalo de confianza al 95%: [45.171,42, $\infty$]
+
+  Este intervalo no incluye el valor 36.386€ y su límite inferior se encuentra 
+  muy por encima de él. Esto parece confirmar que la media es significativamente
+  mayor.
+
+En conclusión, dado que el p-valor es menor que 0.05, se rechaza la hipótesis 
+nula. Por lo tanto, existe suficiente evidencia estadística para determinar que 
+la renta media del País Vasco es mucho mayor que 36.386€.
+
+## Pregunta-2 (45%) 
+
+**Notas: 1) Suponed que la renta sigue una distribución normal y que las varianzas dentro de cada apartado son iguales. 2) Utilizad la función de R correspondiente, es decir, no hagáis los cálculos manualmente con las fórmulas de las notas del temario.**
+
+
+a) Contrastad con un nivel de significación del 5% si la renta media de la comunidad autónoma de Andalucía es igual a la de la Región de Murcia. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (15%).
+
+### Solución
+
+```{r}
+renta_andalucia <- datos$renta_hogar[datos$desc_ccaa == "Andalucía"]
+renta_murcia <- datos$renta_hogar[datos$desc_ccaa == "Región de Murcia"]
+
+res <- t.test(renta_andalucia, renta_murcia, 
+                         alternative = "two.sided", 
+                         var.equal = TRUE, 
+                         conf.level = 0.95)
+res
+
+
+```
+
+Hipótesis 1: $\mu_{\text{Andalucia}} = \mu_{\text{Murcia}}$
+
+Hipótesis 2: $\mu_{\text{Andalucia}} \neq \mu_{\text{Murcia}}$
+
+El nivel de significación es $\alpha = 0.05$.
+
+1- Estadístico del test (t): -0.28338.
+  Cuando el valor t es cercano a 0 quiere decir que no existen diferencias 
+  apreciables entre ambas medias muestrales.
+
+2- Grados de libertad (df): 10679.
+  Un gran grado de libertad indica que se utilizó una muestra lo suficientemente
+  grande y le da un mayor poder estadístico al contraste.
+
+3- p-valor: 0.7769.
+  Este p-valor es muchísimo mayor que el nivel de significación elegido (5%).
+
+4- Intervalo de confianza al 95%: (-1320.3158, 986.7838)
+Este intervalo incluye el 0, lo que podría indicar que la diferencia entre ambas
+medias podría ser nula.
+
+En conclusión, dado que p-valor es mucho mayor 0.05, no se rechaza la hipótesis 
+nula. Por lo tanto, no xiste suficiente evidencia estadística para determinar 
+que la renta de Andalucía sea diferente a la de Murcia con un nivel de 
+significación del 5%.
+
+
+b) Contrastad con un nivel de significación del 5% si la renta media de la comunidad autónoma de las Islas Baleares es superior a la de las Islas Canarias. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (15%).
+
+### Solución
+
+```{r}
+renta_baleares <- datos$renta_hogar[datos$desc_ccaa == "Illes Balears"]
+renta_canarias <- datos$renta_hogar[datos$desc_ccaa == "Canarias"]
+
+# Dado que se asumen varianzas iguales y normalidad:
+res <- t.test(renta_baleares, renta_canarias, 
+                                   alternative = "greater", 
+                                   var.equal = TRUE, 
+                                   conf.level = 0.95)
+
+res
+
+
+```
+Hipótesis 1: $\mu_{\text{Baleares}} \le \mu_{\text{Canarias}}$
+
+Hipótesis 2: $\mu_{\text{Baleares}} > \mu_{\text{Canarias}}$
+
+El nivel de significación es $\alpha = 0.05$.
+
+1- Estadístico del test (t): 7.9686.
+  Este valor, algo elevado, parece indicar que existe una diferencia favorable
+  de la renta media en las Islas Baleares.
+
+2- Grados de libertad (df): 3032
+  Un gran grado de libertad indica que se utilizó una muestra lo suficientemente
+  grande y le da un mayor poder estadístico al contraste.
+
+3- p-valor: 1.125e-15.
+  Este p-valor es muchísimo menor que el nivel de significación 0.05, por lo que 
+  se podría asumir que la diferencia en la renta entre ambas es prácticamente 
+  nula.
+
+4- Intervalo de confianza (95%): (5750.424, Inf)
+  El intervalo de confianza es positivo y se tienda a infinito. Por lo que 
+  parece indicar que la diferencia es claramente favorable a las Islas Baleares.
+
+En conclusión, dado que p-valor es mucho menor 0.05 se puede rechazar la 
+hipótesis 1. Parece que se encuentran suficientes evidencias de que la renta de
+las Islas Baleares es superior a la de las Islas Canarias.
+
+c) Contrastad con un nivel de significación del 5% si la renta media de la comunidad autónoma de Cataluña es inferior a la de la Madrid. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el valor del estadístico de contraste, el p-valor y la conclusión a la que llegáis. (15%).
+
+### Solución
+
+```{r}
+renta_cataluña <- datos$renta_hogar[datos$desc_ccaa == "Cataluña"]
+renta_madrid <- datos$renta_hogar[datos$desc_ccaa == "Comunidad de Madrid"]
+
+res <- t.test(renta_cataluña, renta_madrid, 
+                         alternative = "less", 
+                         var.equal = TRUE,
+                         conf.level = 0.95)
+
+res
+
+
+```
+Hipótesis 1: $\mu_{\text{Cataluña}} \ge \mu_{\text{Madrid}}$
+
+Hipótesis 2: $\mu_{\text{Cataluña}} < \mu_{\text{Madrid}}$
+
+El nivel de significación es $\alpha = 0.05$.
+
+1- Estadístico de contraste (t): -5.11716.
+  El valor claramente negativo podría indicar que la renta media de Cataluña es
+  menor que la de la Comunidad de Madrid.
+
+2- Grados de libertad (df): 13980
+  Un gran grado de libertad indica que se utilizó una muestra lo suficientemente
+  grande y le da un mayor poder estadístico al contraste.
+
+3- p-valor: 1.572e-07.
+  Este p-valor es muchísimo menor que el nivel de significación 0.05, por lo que 
+  se podría rechazar la hipótesis 1.
+
+4- Intervalo de confianza (95%): (-Inf, -1728,059)
+  El intervalo de confianza se encuentra muy por debajo de 0, por lo que la
+  diferencia de rentas medias es estadísticamente signficativa y negativa.
+
+En conclusión, dado que p-valor es mucho menor 0.05 se puede rechazar la 
+hipótesis 1. Parece que se encuentran suficientes evidencias de que la renta de
+la Comunidad de Madrid es superior a la de Cataluña.
+
+
+## Pregunta-3 (25%) 
+
+**Nota: En el apartado a)  realizad solamente los cálculos mediante la función R correspondiente, mientras que para el apartado b) solamente con la fórmula que hay en las notas del temario.**
+
+
+
+a) Contrastad con un nivel de significación del 5% si la proporción de familias que pueden afrontar imprevistos de la comunidad autónoma de las Islas Canarias es diferente a la proporción en las Islas Baleares. Indicad las hipótesis nula y alternativa. A partir de la salida de R, indicad el p-valor y la conclusión a la que llegáis. **Nota: Utilizad en la función de R "correct = FALSE".** (10%).
+
+### Solución
+
+```{r}
+# Filtrado de datos
+canarias <- datos$afrontar_imprevistos[datos$desc_ccaa == "Canarias"]
+baleares <- datos$afrontar_imprevistos[datos$desc_ccaa == "Illes Balears"]
+
+# Contamos cuántas familias pueden afrontar imprevistos 
+# y el total de familias en cada grupo
+x_canarias <- sum(canarias == 1)
+n_canarias <- length(canarias)
+
+x_baleares <- sum(baleares == 1)
+n_baleares <- length(baleares)
+
+
+test_proporciones <- prop.test(x = c(x_canarias, x_baleares), 
+                               n = c(n_canarias, n_baleares), 
+                               alternative = "two.sided", 
+                               conf.level = 0.95, 
+                               correct = FALSE)
+
+test_proporciones
+
+
+```
+Hipótesis 1: $\mu_{\text{Canarias}} = \mu_{\text{Baleares}}$
+
+Hipótesis 2: $\mu_{\text{Canarias}} \neq \mu_{\text{Baleares}}$
+
+El nivel de significación es $\alpha = 0.05$.
+
+1- Diferencia muestral.
+  prop 1 (Islas Canarias): 0.5344048 (53,44%)
+  prop 2 (Islas Baleares): 0.7737296 (77,37%)
+
+2- p-valor: 2.2e-16.
+  El p-valor es mucho menor que $\alpha$ (0.05). Esto parece indicar que existe la 
+  probabilidad de una diferencia notable entre las proporciones es prácticamente
+  nula.
+
+4- Intervalo de confianza (95%): (-0.2728640, -0.2057857)
+  El intervalo de confianza es negativo y no incluye el cero, esto confirma la 
+  existencia de una diferencia bastante significativa entre Canarias y Baleares. 
+  Al ser negativo el intervalo, la proporción en Canarias es menor que la de 
+  Baleares.
+
+En conclusión, dado que p-valor es mucho menor 0.05 se puede rechazar la 
+hipótesis 1. Parece que se encuentran suficientes evidencias de que la 
+proporción de familiar que pueden afrontar imprevisto en las Islas Canarias 
+menor que en las Islas Baleares.
+
+
+b) Calculad manualmente mediante la fórmula pertinente (aproximación a la distribución normal) el estadístico de contraste con los datos del apartado a). (15%).
+
+
+### Solución
+La prueba de comparación de dos proporciones a gran muestra se basa en una aproximación normal, donde el estadístico z viene dado por: $$z = \frac{\hat{p}_1 - \hat{p}_2}{\sqrt{\hat{p}(1-\hat{p}(\frac{1}{n_1}+\frac{1}{n_2}))}}$$
+
+Donde:
+
+- $\hat{p}_1 = \frac{x_1}{n_1}$
+
+- $\hat{p}_2 = \frac{x_2}{n_2}$
+
+- $\hat{p} = \frac{x_1 + x_2}{n_1 + n_2}$
+
+Cuya relación con el valor chi cuadrado sería: $${z = \sqrt{X^2}}$$
+
+Dado que $X^2 = 165.84$, para calcular $z$, resolvemos la raiz cuadrada: $z = \sqrt{165.84}$
+
+```{r}
+
+chi_cuadrado = 165.84
+z = sqrt(chi_cuadrado)
+z
+```
+Obtenemos entonces que: $z = \sqrt{165.84} \approx 12.88$
+
+Es importante tener en cuenta el signo. Como $p_1$ < $p_2$ será negativa:
+
+```{r}
+p1 = 0.5344048
+p2 = 0.7737296
+result = p1 - p2
+result
+```
+Como el resultado de la operación anterior es negativo, podemos concluir que z tendrá un valor aproximado de -12.88.
+
+Un z de aproximadamente -12.88 es bastante significativo, además de concordar con el p-valor muy pequeño obtenido, confirmando asi, que la proporción en Canarias es diferente (en este caso, menor), que la de Baleares.

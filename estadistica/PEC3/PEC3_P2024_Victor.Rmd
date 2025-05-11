@@ -1,0 +1,207 @@
+---
+title: "PEC-3 Otoño 2024"
+author: "Víctor Luque Martín"
+date: '12/11/2024'
+output:
+  pdf_document: default
+  word_document: default
+fontsize: 12pt
+---
+
+
+Os puede ser útil consultar el siguiente material:
+
+1. Reto 2. Probabilidad y variables aleatorias: Módulo Probabilidad y variables aleatorias.
+1. Reto 2. Probabilidad y variables aleatorias: Variables aleatorias. Actividades Resueltas.
+1. Reto 2. Probabilidad y variables aleatorias: Distribuciones de probabilidad e inferencia estadística con R.
+
+
+# NOMBRE: Víctor Luque Martín
+
+# PEC3
+
+## Muy importante:
+En todas las preguntas, tenéis que indicar qué tipo de variable aleatoria usáis y plantear la probabilidad que se pide, como por ejemplo $P(X=4), P(X\leq 3)$, etc, antes de poner las instrucciones y hacer los cálculos con R. Procurad usar las funciones: dnorm, pnorm, dbinom, ...
+
+Toda respuesta que no lleve todas estas explicaciones, con los comentarios pertinentes, será considerada incorrecta aunque se dé un resultado numérico correcto.
+
+```{r,echo=FALSE}
+options(scipen=999)
+```
+
+## Pregunta 1 (60%) 
+
+En cada uno de los siguientes apartados se tiene que indicar cuál es la variable aleatoria considerada, cuál es su distribución, así como todos los cálculos.
+
+**1) En una tienda de informática se sabe que la probabilidad que un pendrive de la marca
+    ScanPen sea defectuoso es del 0,05. De un lote de 100 pendrives,** 
+
+a) ¿Cuál es la probabilidad que haya exactamente 7 defectuosos? (10%)
+   
+La variable aleatoria a utilizar será $X$ , siendo $X$ el número de pendrives defectuosos de un lote de 100. Como cada pendrive puede ser defectuoso o no de forma independiente con una probabilidad del 0.05 ($p=0.05$), $X$ sigue una distribución binomial con parámetros $n=100$, siendo n el total de pendrives del lote y $p=0.05$.
+   
+Por tanto, para hallar la probabilidad de que haya 7 pendrives defectuosos debemos aplicar la siuiente fórmula: $$P(X=7) = P(\text{Binomial}(n=100, p=0.05)=7)$$
+
+```{r}
+# Parámetros de la distribución binomial
+n = 100   # Total de pendrives
+p = 0.05  # Probabilidad de ser defectuoso
+x = 7     # Número de éxitos
+
+# P(X = 7)
+probabilidad = dbinom(x = x, size = n, prob = p)
+
+cat(paste0("La probabilidad de que haya 7 pendrives \n",
+           "defectuosos es: ", probabilidad))
+```
+    
+b) ¿Cuál es la probabilidad que más de 7 sean defectuosos? (10%)
+   
+Seguimos considerando la misma variable aleatorioa $X$ definida en el apartado anterior. En este caso es necesario hallar $P(X>7)$, que es la probabilidad de que haya más de 7 pendrives defectuosos, para ello será necesario utilizar la función de distribución acumulada binomial. Esta probabilidad se puede expresar como: $$P(X>7) = 1-P(X\le7)$$
+    
+```{r}
+# Parámetros de la distribución acumulada binomial
+n = 100   # Total de pendrives
+p = 0.05  # Probabilidad de ser defectuoso
+x = 7     # Número Limite
+
+# P(X <= 7) 
+p_acumulada = pbinom(q = x, size = n, prob = p)
+
+# P(X > 7)
+p_mas_de_7 = 1 - p_acumulada
+
+cat(paste0("La probabilidad de que haya más de 7 pendrives \n",
+           "defectuosos es: ", p_mas_de_7))
+```
+   
+c) ¿Cuántos pendrives pueden esperar que salgan defectuosos en un lote? (10%)
+   
+El valor esperado o la esperanza de una variable aleatoria binomia se define como: $$E[X] = n \times p$$ Teniendo en cuenta que $n=100$, siendo $n$ el número de pendrives en un lote, y $p=0.05$, siendo $p$ la probabilidad de que salga un pendrive defectuoso. Calculamos: $$E[X] = 100 \times 0.05 = 5$$ El código en R sería el siguiente:
+    
+```{r}
+# Parámetros
+n = 100   # Total de pendrives
+p = 0.05  # Probabilidad de ser defectuoso
+
+# E[X]
+valor_esperado = n * p
+
+cat(paste0("Podemos esperar que salgan ", valor_esperado, 
+           " pendrives defectuosos en un lote"))
+```
+
+**2) El dependiente de la tienda va cogiendo pendrives de uno en uno de este lote de 100 a medida que se van 
+    vendiendo.** 
+
+a) ¿Cuál es la probabilidad que el primer pendrive defectuoso que aparezca en el lote sea el sexto? (10%)
+   
+Definimos $X$, esta vez, como el número de pendrives **no** defectuosos que se obtienen antes de encontrar el primer defectuoso. Cada pendrive tiene una probabilidad $p=0.05$ de ser defectuosos, y se asume que los pendrives son seleccionados de manera independiente, por tanto, $X$ sigue una distribución geométrica. La función de probabilidad sería tal que: $$P(X=k)=P(Geom(p=0.05)=k)=(1-p)^k \times p$$ Siendo $k$ el número de pendrives no defectuosos antes del primer defectuoso.
+   
+Sabemos que el primer defectuoso tiene que aparecer el secto, por lo que asumismos, que se han obtenido 5 no defectuosos antes. Por lo tanto $k=5$ (La cuenta se realiza desde el 0). La probabilidad sería: $$P(X=5)=(1-0.05)^5 \times 0.05$$
+   
+```{r}
+# Parámetros
+p = 0.05  # Probabilidad de ser defectuoso
+k = 5     # No defectuosos previos
+
+# P(X = 5)
+probabilidad = dgeom(x = k, prob = p)
+
+cat(paste0("La probabilidad de que el primer defectuoso \n",
+           "apararezca el sexto es: ", probabilidad))
+```
+   
+b) ¿Cuál es la probabilidad de que el primer pendrive defectuoso que aparezca en un lote sea antes del sexto pendrive? (10%)
+   
+Consideramos $X$ como el primer pendrive defectuoso que aparece en las primeras 5 ventas. Su fórmula sería $P(X\le4)$. Tendríamos que calcular la probabilidad utilizando la distribución acumulada de la distribución geométrica: $$P(X\le k)=1-(1-p)^{k+1}$$
+    
+```{r}
+# Parámetros
+p = 0.05  # Probabilidad de ser defectuoso
+k = 4     # Intentos antes de las 5 primeras ventas
+
+# P(X <= 4)
+probabilidad = pgeom(q = k, prob = p)
+
+cat(paste0("La probabilidad de que el primer defectuoso \n",
+           "apararezca antes del sexto es: ", probabilidad))
+```
+
+Observación: Si $Y$ es una variable aleatoria geométrica de parámetro $p$ para calcular $P(Y=k)$ usaremos en R la función $dgeom(x=k-1, prop=p)$. Fijaos que en la función tenemos que poner $k-1$. 
+
+**3) El número de clientes que entran en la tienda de informática en un periodo de cinco
+    minutos sigue una distribución de Poisson de parámetro 1.2 ¿Cuál es la probabilidad
+    que en 15 minutos el número de clientes no sea superior a 2? (10%)**
+    
+Definimos la variable aleatoria $X$ como el número de clientes que entran en la tienda en 15 minutos. Sabemos que el número de clientes que entran en 5 minutos siguen la distribución de Poisson con $\lambda=1.2$. Suponiendo que el proceso es homogéneo, en 15 minutos (que equivalen a tres periodos de 5 minutos), el parámetro de la distribución Poisson será: $$\lambda_{\text{15 min}}=\lambda_{\text{5 min}} \times 3 = 1.2 \times 3 = 3.6$$ Una vez hallado el parámetro $\lambda_{\text{15 min}}=3.6$ debemos calcular la probabilidad de que en 15 minutos entren como máximo 2 clientes, es decir: $$P(X\le2)$$
+
+```{r}
+# Parámetros
+lambda = 1.2 * 3  # Lambda 15 min
+x = 2             # Máximos de clientes
+
+# P(X <= 2)
+probabilidad = ppois(q = x, lambda = lambda)
+
+cat(paste0("La probabilidad de que en un periodo de 15 minutos entren\n",
+           "como máximo 2 clientes en la tienda es: ", probabilidad))
+```
+
+## Pregunta 2 (40%)
+**El tiempo que tarda un ordenador de una empresa determinada al infectarse de virus sigue una distribución normal de media $1$ hora y desviación estándar $5$ minutos.**
+
+a) ¿Cuál es la probabilidad que un ordenador se infecte en menos de $45$ minutos? (10%)
+
+Definimos la variable aleatoria $X$ como el tiempo (en minutos) que tarda un ordenador en infectarse. La variable aleatoria $X$ sigue una distribución normal $X \sim N(\mu=60, \sigma=5)$, siendo la media $\mu$ de 60 minutos (1 hora) y la desviación estándar $\sigma$ de 5 minutos. Difinimos la probabilidad de que un ordenador se infecte en menos de 45 minutos como: $$P(X<45)$$
+
+```{r}
+# Parámetros
+mu = 60
+sigma = 5
+x = 45
+
+# P(X < 45)
+probabilidad = pnorm(q = x, mean = mu, sd = sigma)
+
+cat(paste0("La probabilidad de que un ordenador se infecte \n",
+           "en menos de 45 minutos es: ", probabilidad))
+```
+
+b) ¿Cuál es la probabilidad de que un ordenador tarde más de $65$ minutos al infectarse? (10%)
+
+Definimos la misma variable aleatoria que en el apartado anterior $X \sim N(\mu=60, \sigma=5)$. Esta vez debemos calcular la probabilidad de que un ordenador tarde más de 65 minuros en infectarse, podemos definir esta probabilidad como: $$P(X > 65) = 1-P(X\le65)$$
+
+```{r}
+# Parámetros
+mu = 60
+sigma = 5
+x = 65
+
+# P(X <= 65)
+probabilidad = 1 - pnorm(q = x, mean = mu, sd = sigma)
+
+cat(paste0("La probabilidad de que un ordenador se infecte \n",
+           "en más de 65 minutos es: ", probabilidad))
+
+```
+
+c) ¿En cuánto de tiempo se infectan el $99$ % de los ordenadores de la empresa?(20%)
+Indicación: A la hora de realizar el problema, pensad que tenéis que trabajar o siempre en horas o siempre en minutos.
+
+Definimos la misma varible aleatoria que en el apartado anterior $X \sim N(\mu=60, \sigma=5)$. Esta vez debemos calcular el tiempo que tardarían en infectarse el 99% de los ordenadores mediante un cálculo del percentil. Para ello queremos encontrar el valor de $x$ de la siguiente probabilidad $P(X \le x)=0.99$. Aplicamos la función `qnorm` para calcular el cuantil correspondiente al 99%.
+
+```{r}
+# Parámetros
+mu = 60
+sigma = 5
+p = 0.99
+
+# P(X <= x) = 0.99
+x = qnorm(p, mean = mu, sd = sigma)
+
+cat(paste0("En aproximadamente ", x, " minutos el 99% \n",
+           "de los ordenadores de la empresa se habrán infectado"))
+```
+
+
