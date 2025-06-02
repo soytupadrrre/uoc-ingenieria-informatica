@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17.4
+    container_name: dbhost
+    networks:
+      - db-network
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./dataset:/docker-entrypoint-initdb.d/:ro
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./bun-app
+      dockerfile: Dockerfile
+    container_name: webhost
+    networks:
+      - web-network
+      - db-network
+    environment:
+      POSTGRES_HOST: dbhost
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile
+    container_name: proxyhost
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - web-network
+    volumes:
+      - ./reverse-proxy/haproxy.pem:/usr/local/etc/haproxy/haproxy.pem:ro
+
+volumes:
+  dbdata:
+
+networks:
+  web-network:
+    name: web-network
+
+  db-network:
+    name: db-network
